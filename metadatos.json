@@ -1,0 +1,38 @@
+{
+    "amada": {
+        "nombre_mostrado": "Amada",
+        "sexo": "Hembra"
+    },
+    "perla": {
+        "nombre_mostrado": "Perla",
+        "sexo": "Hembra"
+    },
+    "romeo": {
+        "nombre_mostrado": "Romeo",
+        "sexo": "Macho"
+    },
+    "ramona": {
+        "nombre_mostrado": "Ramona",
+        "sexo": "Hembra"
+    },
+    "bobby": {
+        "nombre_mostrado": "Bobby",
+        "sexo": "Macho"
+    },
+    "lobito": {
+        "nombre_mostrado": "Lobito",
+        "sexo": "Macho"
+    },
+    "mora": {
+        "nombre_mostrado": "Mora",
+        "sexo": "Hembra"
+    },
+    "tommy": {
+        "nombre_mostrado": "Tommy",
+        "sexo": "Macho"
+    },
+    "cabezon": {
+        "nombre_mostrado": "Cabezón",
+        "sexo": "Macho"
+    }
+}

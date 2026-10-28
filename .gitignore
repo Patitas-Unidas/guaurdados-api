@@ -3,3 +3,4 @@ __pycache__/
 *.pt
 db_perros/
 embeddings.pkl
+firebase_credentials.json

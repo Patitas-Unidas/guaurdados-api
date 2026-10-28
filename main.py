@@ -1,7 +1,7 @@
 # Criterio de evaluación: 
 # Calculamos la diferencia: {diferencia} = {score}_1 - {score}_2
-# Match claro (30$ de ventaja): Se declara ganador absoluto (status: "MATCH").
-# Duda entre dos (10% < {diferencia} < 30%): Retorna ambos candidatos (status: "AMBIGUOUS").
+# Match claro (>= 30% de ventaja): Se declara ganador absoluto (status: "MATCH").
+# Duda entre dos (10% <= {diferencia} < 30%): Retorna ambos candidatos (status: "AMBIGUOUS").
 # Diferencia < 10% o similitud base muy baja (< 35%): Se descarta por falta de certeza (status: "NO_MATCH").
 
 import io
@@ -21,6 +21,9 @@ import torch
 import torchvision.models as models
 import torchvision.transforms as transforms
 from ultralytics import YOLO
+
+# Sincronización automática de metadatos desde Cloud Firestore
+from sync_metadata import sincronizar_metadatos_desde_firebase
 
 app = FastAPI(title="GUAUrdados Dog Recognition API")
 
@@ -52,7 +55,7 @@ feature_extractor = feature_extractor.to(device).eval()
 
 def normalizar_texto(texto: str) -> str:
     texto = unicodedata.normalize("NFD", texto.lower())
-    return "".join(c for c in texto if unicodedata.category(c) != "Mn")
+    return "".join(c for c in texto if unicodedata.category(c) != "Mn").strip()
 
 def corregir_orientacion(img: Image.Image) -> Image.Image:
     try:
@@ -71,7 +74,7 @@ def recortar_perro_desde_pil(img: Image.Image) -> Optional[Image.Image]:
     best_box = max(dog_boxes, key=lambda b: float(b.conf[0]))
     x1, y1, x2, y2 = map(int, best_box.xyxy[0].tolist())
     
-    # Añadir un 10% de margen para no cortar orejas/hocico
+    # Añadir 10% de margen para no recortar bordes de orejas/hocico
     ancho, alto = img.size
     dx = int((x2 - x1) * 0.1)
     dy = int((y2 - y1) * 0.1)
@@ -99,7 +102,14 @@ METADATA_FILE = "metadatos.json"
 @app.on_event("startup")
 def inicializar_base_datos():
     global BASE_DATOS
+
+    # 1. Sincroniza metadatos actualizados desde Cloud Firestore
+    try:
+        sincronizar_metadatos_desde_firebase()
+    except Exception as e:
+        print(f"Aviso: No se pudo sincronizar automáticamente con Firebase ({e}). Se usarán metadatos locales.")
     
+    # 2. Cargar embeddings en caché si existen
     if os.path.exists(CACHE_EMBEDDINGS):
         print(f"Cargando embeddings desde {CACHE_EMBEDDINGS}...")
         with open(CACHE_EMBEDDINGS, "rb") as f:
@@ -107,6 +117,7 @@ def inicializar_base_datos():
         print(f"Base de datos cargada: {len(BASE_DATOS)} perros en memoria.")
         return
 
+    # 3. Indexar base de datos local db_perros/ si no hay embeddings.pkl
     if not os.path.exists(DB_DIR):
         print(f"AVISO: No se encontró la carpeta {DB_DIR}.")
         return
@@ -139,18 +150,24 @@ def inicializar_base_datos():
                 print(f"Error procesando {foto_path}: {e}")
 
         if vectores_perro:
-            # Busca ignorando si la carpeta tiene mayúsculas o minúsculas
-            clave_perro = perro_folder.lower().strip()
+            clave_perro = normalizar_texto(perro_folder)
             info_meta = metadatos.get(clave_perro, {})
+            
+            id_firestore = info_meta.get("id_firestore", perro_folder)
             nombre_mostrar = info_meta.get("nombre_mostrado", perro_folder.capitalize())
             sexo = info_meta.get("sexo", "Desconocido")
+            foto_url = info_meta.get("foto", "")
+            subtitulo = info_meta.get("subtitulo", f"Perro registrado · {sexo}")
             
             BASE_DATOS[perro_folder] = {
+                "id": id_firestore,
                 "nombre": nombre_mostrar,
                 "sexo": sexo,
+                "foto": foto_url,
+                "subtitulo": subtitulo,
                 "vectores": np.array(vectores_perro)
             }
-            print(f"  -> {nombre_mostrar} ({sexo}): {len(vectores_perro)} fotos indexadas.")
+            print(f"  -> {nombre_mostrar} ({sexo}) [ID: {id_firestore}]: {len(vectores_perro)} fotos indexadas.")
 
     with open(CACHE_EMBEDDINGS, "wb") as f:
         pickle.dump(BASE_DATOS, f)
@@ -183,7 +200,7 @@ async def identificar(
             }
 
         candidatos = []
-        for dog_id, datos in BASE_DATOS.items():
+        for dog_key, datos in BASE_DATOS.items():
             if sexo_filtro and normalizar_texto(datos["sexo"]) != normalizar_texto(sexo_filtro):
                 continue
 
@@ -191,9 +208,11 @@ async def identificar(
             max_score = float(np.max(similitudes))
             
             candidatos.append({
-                "id": dog_id,
+                "id": datos["id"],
                 "nombre": datos["nombre"],
                 "sexo": datos["sexo"],
+                "foto": datos["foto"],
+                "subtitulo": datos["subtitulo"],
                 "score": max_score
             })
 
@@ -203,33 +222,31 @@ async def identificar(
                 "mensaje": "No hay perros que coincidan con el criterio seleccionado."
             }
 
-        # Ordenar de mayor a menor coincidencia
+        # Ordenar candidatos de mayor a menor score
         candidatos.sort(key=lambda x: x["score"], reverse=True)
         top1 = candidatos[0]
         score1 = top1["score"]
 
-        # Si el mejor score es menor al 35%, la imagen ni siquiera se parece a los registros
+        # Si el mejor score es menor al 35%, la imagen ni siquiera se asemeja al perro
         if score1 < 0.35:
             return {
                 "status": "NO_MATCH",
                 "mensaje": "No se encontró coincidencia con los perros registrados."
             }
 
-        # Caso donde solo hay 1 candidato disponible
+        # Caso donde solo hay 1 candidato en la base
         if len(candidatos) == 1:
             return {
                 "status": "MATCH",
                 "perro": {
-                    "id": top1["id"],
-                    "nombre": top1["nombre"],
-                    "sexo": top1["sexo"],
+                    **top1,
                     "coincidencia": f"{round(score1 * 100, 1)}%"
                 }
             }
 
         top2 = candidatos[1]
         score2 = top2["score"]
-        diferencia = (score1 - score2) * 100  # Margen en puntos porcentuales
+        diferencia = (score1 - score2) * 100
 
         print(f"Top 1: {top1['nombre']} ({round(score1*100, 1)}%) vs Top 2: {top2['nombre']} ({round(score2*100, 1)}%) | Margen: {round(diferencia, 1)}%")
 
@@ -238,9 +255,7 @@ async def identificar(
             return {
                 "status": "MATCH",
                 "perro": {
-                    "id": top1["id"],
-                    "nombre": top1["nombre"],
-                    "sexo": top1["sexo"],
+                    **top1,
                     "coincidencia": f"{round(score1 * 100, 1)}%"
                 }
             }
@@ -250,23 +265,19 @@ async def identificar(
             return {
                 "status": "AMBIGUOUS",
                 "candidato_1": {
-                    "id": top1["id"],
-                    "nombre": top1["nombre"],
-                    "sexo": top1["sexo"],
+                    **top1,
                     "coincidencia": f"{round(score1 * 100, 1)}%"
                 },
                 "candidato_2": {
-                    "id": top2["id"],
-                    "nombre": top2["nombre"],
-                    "sexo": top2["sexo"],
+                    **top2,
                     "coincidencia": f"{round(score2 * 100, 1)}%"
                 }
             }
 
-        # 3. Diferencia menor al 10% (empate técnico sin certeza suficiente)
+        # 3. Diferencia menor al 10% (empate técnico)
         return {
             "status": "NO_MATCH",
-            "mensaje": f"No hay certeza suficiente entre {top1['nombre']} ({round(score1*100, 1)}%) y {top2['nombre']} ({round(score2*100, 1)}%)."
+            "mensaje": f"No hay certeza suficiente entre {top1['nombre']} y {top2['nombre']}."
         }
 
     except Exception as e:

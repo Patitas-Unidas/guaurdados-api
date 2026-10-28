@@ -1,38 +1,79 @@
 {
-    "amada": {
-        "nombre_mostrado": "Amada",
-        "sexo": "Hembra"
-    },
-    "perla": {
-        "nombre_mostrado": "Perla",
-        "sexo": "Hembra"
-    },
-    "romeo": {
-        "nombre_mostrado": "Romeo",
-        "sexo": "Macho"
-    },
-    "ramona": {
-        "nombre_mostrado": "Ramona",
-        "sexo": "Hembra"
-    },
-    "bobby": {
-        "nombre_mostrado": "Bobby",
-        "sexo": "Macho"
-    },
-    "lobito": {
-        "nombre_mostrado": "Lobito",
-        "sexo": "Macho"
-    },
-    "mora": {
-        "nombre_mostrado": "Mora",
-        "sexo": "Hembra"
-    },
-    "tommy": {
-        "nombre_mostrado": "Tommy",
-        "sexo": "Macho"
-    },
-    "cabezon": {
-        "nombre_mostrado": "Cabezón",
-        "sexo": "Macho"
-    }
+  "ramona": {
+    "id_firestore": "1PYCFaMxzw0nCFkEOERQ",
+    "nombre_mostrado": "Ramona",
+    "sexo": "Hembra",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FRamona.jpg?alt=media&token=cd1ba092-6b89-4061-8f3a-5d753b675ef3",
+    "subtitulo": "Mestizo · 2 años"
+  },
+  "bobby": {
+    "id_firestore": "8dAS9y4LV3pAJj9vazWy",
+    "nombre_mostrado": "Bobby",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FBobby.jpg?alt=media&token=8d02848a-e159-471a-8cd7-9893a40d79fd",
+    "subtitulo": "Mestizo · 3 años"
+  },
+  "ramon": {
+    "id_firestore": "BQSQ5LOp4wM7afyxoG9a",
+    "nombre_mostrado": "Ramon",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FRamon.jpg?alt=media&token=2f748e06-a649-4b20-aef9-68ebdfbf6de5",
+    "subtitulo": "Mestizo · 3 años"
+  },
+  "romeo": {
+    "id_firestore": "HDMyVIPa96wGDuYq886G",
+    "nombre_mostrado": "Romeo",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FRomeo.jpg?alt=media&token=1c421107-4609-455a-a4e5-3a53c55320ed",
+    "subtitulo": "Mestizo · 8 años"
+  },
+  "lobito": {
+    "id_firestore": "T83VaC4zne877LUIxHmh",
+    "nombre_mostrado": "Lobito",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FLobito.jpg?alt=media&token=bcfa7e0b-b859-43a7-86c1-6ad6bfc65843",
+    "subtitulo": "Mestizo · 10 años"
+  },
+  "mora": {
+    "id_firestore": "ZRW4Gq3BkVKE5ABA15B3",
+    "nombre_mostrado": "Mora",
+    "sexo": "Hembra",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FMora.jpg?alt=media&token=07c05b06-1888-4ccd-9eec-248791d10f42",
+    "subtitulo": "Mestizo · 2 años"
+  },
+  "scooby": {
+    "id_firestore": "aMeB2M6SW7MYWhMj2RGR",
+    "nombre_mostrado": "Scooby",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FScooby.jpg?alt=media&token=d098aa05-321b-4cdc-b792-27d8eb5d24ed",
+    "subtitulo": "Mestizo · 3 años"
+  },
+  "perla": {
+    "id_firestore": "fdzZIE1HTbry2dUsgodR",
+    "nombre_mostrado": "Perla",
+    "sexo": "Hembra",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2Fperla.jpeg?alt=media&token=c6f38a7f-4712-4f1a-a803-ddebef9b05c6",
+    "subtitulo": "Mestizo"
+  },
+  "tommy": {
+    "id_firestore": "nw1bUuJbJR4dxkKjna6l",
+    "nombre_mostrado": "Tommy",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2FTommy.jpg?alt=media&token=058dcc59-9012-4d8d-baa2-ca00037c99aa",
+    "subtitulo": "Mestizo · 5 años"
+  },
+  "cabezon": {
+    "id_firestore": "rxJmTYMDN3RG5R0eNbLb",
+    "nombre_mostrado": "Cabezón",
+    "sexo": "Macho",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2Fcabezon.jpeg?alt=media&token=7ae32389-3633-4162-b5c1-00b9145e5def",
+    "subtitulo": "Mestizo"
+  },
+  "amada": {
+    "id_firestore": "z7Pm9iPoNZfETew8bq2P",
+    "nombre_mostrado": "Amada",
+    "sexo": "Hembra",
+    "foto": "https://firebasestorage.googleapis.com/v0/b/guaurdados.firebasestorage.app/o/images%2F45.jpeg?alt=media&token=b2af524a-855e-45d4-9d31-eef87f5b2b13",
+    "subtitulo": "Schnauzer mestiza · 3 años"
+  }
 }

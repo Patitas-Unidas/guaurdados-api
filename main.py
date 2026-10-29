@@ -1,7 +1,7 @@
 # Criterio de evaluación: 
 # Calculamos la diferencia: {diferencia} = {score}_1 - {score}_2
-# Match claro (>= 30% de ventaja): Se declara ganador absoluto (status: "MATCH").
-# Duda entre dos (10% <= {diferencia} < 30%): Retorna ambos candidatos (status: "AMBIGUOUS").
+# Match claro (>= 20% de ventaja): Se declara ganador absoluto (status: "MATCH").
+# Duda entre dos (10% <= {diferencia} < 20%): Retorna ambos candidatos (status: "AMBIGUOUS").
 # Diferencia < 10% o similitud base muy baja (< 35%): Se descarta por falta de certeza (status: "NO_MATCH").
 
 import io
@@ -250,8 +250,8 @@ async def identificar(
 
         print(f"Top 1: {top1['nombre']} ({round(score1*100, 1)}%) vs Top 2: {top2['nombre']} ({round(score2*100, 1)}%) | Margen: {round(diferencia, 1)}%")
 
-        # 1. Match definitivo si le saca 30% o más de ventaja al segundo
-        if diferencia >= 30.0:
+        # 1. Match definitivo si le saca 20% o más de ventaja al segundo
+        if diferencia >= 20.0:
             return {
                 "status": "MATCH",
                 "perro": {
@@ -260,8 +260,8 @@ async def identificar(
                 }
             }
 
-        # 2. Duda razonable si la diferencia está entre 10% y 30%
-        if 10.0 <= diferencia < 30.0:
+        # 2. Duda razonable si la diferencia está entre 10% y 20%
+        if 10.0 <= diferencia < 20.0:
             return {
                 "status": "AMBIGUOUS",
                 "candidato_1": {
